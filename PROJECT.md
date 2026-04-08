@@ -183,9 +183,9 @@ apps/
   worker/         # Docker — Slidev dev server + file/command API
   exporter/       # Docker — one-shot slidev build + S3 upload
 packages/
-  ui/             # Shared React components (tiling layout, panels, etc.)
   convex/         # Convex schema, mutations, queries
   types/          # Shared TypeScript types
+  typescript-config/  # Shared tsconfig bases
 sst.config.ts     # AWS infrastructure (SST v3)
 ```
 
