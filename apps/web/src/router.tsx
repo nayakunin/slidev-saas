@@ -1,13 +1,17 @@
-import { QueryClient } from "@tanstack/react-query";
 import { createRouter as createTanStackRouter } from "@tanstack/react-router";
 import { setupRouterSsrQueryIntegration } from "@tanstack/react-router-ssr-query";
-import type { ReactNode } from "react";
 
-import TanstackQueryProvider, { getContext } from "./integrations/tanstack-query/root-provider";
+import { getContext as getConvexContext } from "./integrations/convex/provider";
+import { getContext } from "./integrations/tanstack-query/root-provider";
 import { routeTree } from "./routeTree.gen";
 
 export function getRouter() {
-  const context = getContext();
+  const convexContext = getConvexContext();
+  const queryContext = getContext();
+  const context = {
+    ...queryContext,
+    ...convexContext,
+  };
 
   const router = createTanStackRouter({
     routeTree,

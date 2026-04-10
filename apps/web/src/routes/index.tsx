@@ -1,7 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute("/")({ component: App });
+import { AppShell } from "@/components/app-shell";
+import { Dashboard } from "@/components/dashboard";
+import { LandingPage } from "@/components/landing";
+import { useUser } from "@/hooks/useUser";
 
-function App() {
-  return <div>hello wrold</div>;
+export const Route = createFileRoute("/")({ component: HomePage });
+
+function HomePage() {
+  const user = useUser();
+
+  if (!user) {
+    return <LandingPage />;
+  }
+
+  return (
+    <AppShell breadcrumb="Dashboard">
+      <Dashboard />
+    </AppShell>
+  );
 }

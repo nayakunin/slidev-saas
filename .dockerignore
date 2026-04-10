@@ -1,0 +1,10 @@
+.git
+.pnpm-store
+.turbo
+.vscode
+node_modules
+**/node_modules
+**/dist
+**/.turbo
+**/.next
+**/coverage
