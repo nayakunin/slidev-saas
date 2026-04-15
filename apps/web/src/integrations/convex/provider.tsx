@@ -1,10 +1,10 @@
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 
-import { env } from "@/env";
+import { clientEnv } from "@/env";
 
 export function getContext() {
   return {
-    convexClient: new ConvexReactClient(env.VITE_CONVEX_URL),
+    convexClient: new ConvexReactClient(clientEnv.VITE_CONVEX_URL),
   };
 }
 
