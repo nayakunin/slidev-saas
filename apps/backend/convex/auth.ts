@@ -7,8 +7,18 @@ import type { ActionCtx, MutationCtx, QueryCtx } from "./_generated/server";
 type AuthCtx = Pick<ActionCtx | MutationCtx | QueryCtx, "auth">;
 type ReadCtx = Pick<QueryCtx | MutationCtx, "auth" | "db">;
 
+function logIdentityState(event: string, identity: UserIdentity | null) {
+  console.info("[auth-debug]", event, {
+    email: identity?.email ?? null,
+    issuer: identity?.issuer ?? null,
+    subject: identity?.subject ?? null,
+    tokenIdentifier: identity?.tokenIdentifier ?? null,
+  });
+}
+
 export async function requireIdentity(ctx: AuthCtx) {
   const identity = await ctx.auth.getUserIdentity();
+  logIdentityState("requireIdentity", identity);
 
   if (!identity) {
     throw new Error("Authentication required.");
@@ -167,6 +177,11 @@ export async function getCurrentPersonalContextOrNull(ctx: ReadCtx) {
   const user = await getCurrentUser(ctx, identity);
 
   if (!user) {
+    console.info("[auth-debug] No local user found for authenticated identity.", {
+      issuer: identity.issuer,
+      subject: identity.subject,
+      tokenIdentifier: identity.tokenIdentifier,
+    });
     return null;
   }
 
@@ -178,6 +193,14 @@ export async function getCurrentPersonalContextOrNull(ctx: ReadCtx) {
     workspace.ownerUserId !== user._id ||
     workspace.workosOrganizationId
   ) {
+    console.info("[auth-debug] Personal workspace lookup failed for authenticated user.", {
+      tokenIdentifier: identity.tokenIdentifier,
+      userId: user._id,
+      workspaceId: workspace?._id ?? null,
+      workspaceKind: workspace?.kind ?? null,
+      workspaceOwnerUserId: workspace?.ownerUserId ?? null,
+      workspaceWorkosOrganizationId: workspace?.workosOrganizationId ?? null,
+    });
     return null;
   }
 
