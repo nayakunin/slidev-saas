@@ -1,3 +1,7 @@
+## Assumptions
+
+The project is green field. No migrations or legacy code to worry about. All breaking changes are allowed. The goal is to build the best possible solution given the current state and constraints provided without hestiations of removing something old.
+
 ## Rules
 
 - Env Management: Using @t3-oss/env-core package.

@@ -1,7 +1,11 @@
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { ensureProjectOwner, requireIdentity, requireProjectAccess } from "./auth";
+import {
+  ensureCurrentPersonalContext,
+  getCurrentPersonalContextOrNull,
+  requireProjectAccess,
+} from "./auth";
 import {
   buildTextFileRecord,
   ENTRY_FILE_PATH,
@@ -13,12 +17,16 @@ import {
 export const listProjects = query({
   args: {},
   handler: async (ctx) => {
-    const identity = await requireIdentity(ctx);
+    const context = await getCurrentPersonalContextOrNull(ctx);
+
+    if (!context) {
+      return [];
+    }
 
     return await ctx.db
       .query("projects")
-      .withIndex("by_ownerTokenIdentifier_and_updatedAt", (query) =>
-        query.eq("ownerTokenIdentifier", identity.tokenIdentifier),
+      .withIndex("by_workspaceId_and_updatedAt", (query) =>
+        query.eq("workspaceId", context.workspace._id),
       )
       .order("desc")
       .take(100);
@@ -40,7 +48,7 @@ export const createProjectFromTemplate = mutation({
     title: v.string(),
   },
   handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx);
+    const { user, workspace } = await ensureCurrentPersonalContext(ctx);
     const now = Date.now();
     const baseSlug = slugify(args.title);
     let slug = baseSlug;
@@ -59,7 +67,8 @@ export const createProjectFromTemplate = mutation({
     const projectId = await ctx.db.insert("projects", {
       title: args.title.trim() || "Untitled deck",
       slug,
-      ownerTokenIdentifier: identity.tokenIdentifier,
+      workspaceId: workspace._id,
+      createdByUserId: user._id,
       templateVersion: TEMPLATE_VERSION,
       entryFilePath: ENTRY_FILE_PATH,
       createdAt: now,
@@ -89,8 +98,7 @@ export const markOpened = mutation({
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
 
     const now = Date.now();
 

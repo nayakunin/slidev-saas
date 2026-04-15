@@ -1,12 +1,8 @@
-import {
-  buildProjectTree,
-  normalizeProjectPath,
-  type ProjectFileSummary,
-} from "./editor";
 import { v } from "convex/values";
 
 import { mutation, query } from "./_generated/server";
-import { ensureProjectOwner, requireIdentity, requireProjectAccess } from "./auth";
+import { requireIdentity, requireProjectAccess } from "./auth";
+import { buildProjectTree, normalizeProjectPath, type ProjectFileSummary } from "./editor";
 import { getFileByPath, MAX_INLINE_TEXT_BYTES, sha256Hex } from "./lib";
 
 function toSummary(doc: {
@@ -58,9 +54,7 @@ export const getFile = query({
 
     return {
       ...file,
-      downloadUrl: file.storageId
-        ? await ctx.storage.getUrl(file.storageId)
-        : null,
+      downloadUrl: file.storageId ? await ctx.storage.getUrl(file.storageId) : null,
     };
   },
 });
@@ -105,8 +99,7 @@ export const saveTextFile = mutation({
     mimeType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
 
     const normalizedPath = normalizeProjectPath(args.path);
     const now = Date.now();
@@ -163,8 +156,7 @@ export const createFile = mutation({
     mimeType: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
     const normalizedPath = normalizeProjectPath(args.path);
     const existing = await getFileByPath(ctx, args.projectId, normalizedPath);
 
@@ -201,8 +193,7 @@ export const renameFile = mutation({
     toPath: v.string(),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
     const existing = await getFileByPath(ctx, args.projectId, args.fromPath);
 
     if (!existing) {
@@ -236,8 +227,7 @@ export const deleteFile = mutation({
     path: v.string(),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
     const existing = await getFileByPath(ctx, args.projectId, args.path);
 
     if (!existing) {
@@ -265,8 +255,7 @@ export const registerUploadedAsset = mutation({
     sha256: v.string(),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    await requireProjectAccess(ctx, args.projectId);
     const normalizedPath = normalizeProjectPath(args.path);
     const existing = await getFileByPath(ctx, args.projectId, normalizedPath);
     const now = Date.now();

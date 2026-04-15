@@ -34,8 +34,26 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       initialAuth: await loadInitialAuthFn(),
     };
   },
+  notFoundComponent: RootNotFound,
   shellComponent: RootDocument,
 });
+
+function RootNotFound() {
+  return (
+    <div className="flex min-h-[50vh] items-center justify-center px-6 py-12">
+      <div className="w-full max-w-md border border-border bg-card px-6 py-5">
+        <div className="text-xs uppercase tracking-[0.24em] text-muted-foreground">Not Found</div>
+        <div className="mt-2 text-sm text-foreground">The page you requested does not exist.</div>
+        <a
+          href="/"
+          className="mt-4 inline-flex text-sm text-foreground underline underline-offset-4"
+        >
+          Return home
+        </a>
+      </div>
+    </div>
+  );
+}
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   const { initialAuth } = Route.useLoaderData();

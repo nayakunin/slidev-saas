@@ -1,13 +1,13 @@
 import { v } from "convex/values";
 
 import { EXPORT_PIPELINE_VERSION, type ExportFormat } from "../export-contract";
-import { exportFormatValidator } from "./schema";
-import { internalMutation, internalQuery, query } from "./_generated/server";
 import type { Doc, Id } from "./_generated/dataModel";
+import { internalMutation, internalQuery, query } from "./_generated/server";
 import type { MutationCtx, QueryCtx } from "./_generated/server";
-import { ensureProjectOwner, requireProjectAccess, requireIdentity } from "./auth";
+import { ensureCurrentPersonalContext, requireProjectAccess, requireWorkspaceAccess } from "./auth";
 import { exportPool } from "./exportWorkpool";
 import { getFileByPath, sha256Hex } from "./lib";
+import { exportFormatValidator } from "./schema";
 
 function isTerminalStatus(status: Doc<"exportJobs">["status"]) {
   return status === "succeeded" || status === "failed";
@@ -25,10 +25,7 @@ function toErrorMessage(value: unknown) {
   return "Export dispatch failed.";
 }
 
-async function getProjectFiles(
-  ctx: Pick<QueryCtx | MutationCtx, "db">,
-  projectId: Id<"projects">,
-) {
+async function getProjectFiles(ctx: Pick<QueryCtx | MutationCtx, "db">, projectId: Id<"projects">) {
   return await ctx.db
     .query("projectFiles")
     .withIndex("by_project_path", (query) => query.eq("projectId", projectId))
@@ -134,8 +131,8 @@ export const ensureQueuedJob = internalMutation({
     fingerprint: v.string(),
   },
   handler: async (ctx, args) => {
-    const { identity, project } = await requireProjectAccess(ctx, args.projectId);
-    await ensureProjectOwner(ctx, project, identity.tokenIdentifier);
+    const { user, workspace } = await ensureCurrentPersonalContext(ctx);
+    await requireProjectAccess(ctx, args.projectId);
 
     const existingJob = await getActiveJob(ctx, args.projectId, args.format, args.fingerprint);
 
@@ -149,7 +146,8 @@ export const ensureQueuedJob = internalMutation({
     const now = Date.now();
     const jobId = await ctx.db.insert("exportJobs", {
       projectId: args.projectId,
-      ownerTokenIdentifier: identity.tokenIdentifier,
+      workspaceId: workspace._id,
+      requestedByUserId: user._id,
       format: args.format,
       fingerprint: args.fingerprint,
       pipelineVersion: EXPORT_PIPELINE_VERSION,
@@ -371,7 +369,7 @@ export const applyExporterCallback = internalMutation({
 
     if (existingCache) {
       await ctx.db.patch(existingCache._id, {
-        ownerTokenIdentifier: job.ownerTokenIdentifier,
+        workspaceId: job.workspaceId,
         fingerprint: args.fingerprint,
         pipelineVersion: job.pipelineVersion,
         bucketKey: args.bucketKey,
@@ -384,7 +382,7 @@ export const applyExporterCallback = internalMutation({
     } else {
       cacheId = await ctx.db.insert("exportCaches", {
         projectId: job.projectId,
-        ownerTokenIdentifier: job.ownerTokenIdentifier,
+        workspaceId: job.workspaceId,
         format: job.format,
         fingerprint: args.fingerprint,
         pipelineVersion: job.pipelineVersion,
@@ -426,10 +424,15 @@ export const getExportStatus = query({
     jobId: v.id("exportJobs"),
   },
   handler: async (ctx, args) => {
-    const identity = await requireIdentity(ctx);
     const job = await ctx.db.get(args.jobId);
 
-    if (!job || job.ownerTokenIdentifier !== identity.tokenIdentifier) {
+    if (!job) {
+      return null;
+    }
+
+    try {
+      await requireWorkspaceAccess(ctx, job.workspaceId);
+    } catch {
       return null;
     }
 
