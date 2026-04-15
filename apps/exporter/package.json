@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "build": "tsdown",
-    "dev": "tsdown --watch --on-success \"node dist/server.mjs\"",
+    "dev": "tsdown --watch --on-success \"node --env-file=.env.local dist/server.mjs\"",
+    "dev:server": "tsdown --watch --on-success \"node dist/server.mjs\"",
     "start": "node dist/server.mjs",
     "check-types": "tsgo --noEmit",
     "lint": "oxlint src",

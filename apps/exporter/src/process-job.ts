@@ -17,12 +17,12 @@ import { getEnv } from "./env";
 
 function getS3Client(env: ExporterEnv) {
   return new S3Client({
-    region: env.EXPORTS_BUCKET_REGION,
-    endpoint: env.EXPORTS_BUCKET_ENDPOINT,
-    forcePathStyle: env.EXPORTS_BUCKET_FORCE_PATH_STYLE,
+    region: env.EXPORTER_BUCKET_REGION,
+    endpoint: env.EXPORTER_BUCKET_ENDPOINT,
+    forcePathStyle: env.EXPORTER_BUCKET_FORCE_PATH_STYLE,
     credentials: {
-      accessKeyId: env.EXPORTS_BUCKET_ACCESS_KEY_ID,
-      secretAccessKey: env.EXPORTS_BUCKET_SECRET_ACCESS_KEY,
+      accessKeyId: env.EXPORTER_BUCKET_ACCESS_KEY_ID,
+      secretAccessKey: env.EXPORTER_BUCKET_SECRET_ACCESS_KEY,
     },
   });
 }
@@ -122,7 +122,7 @@ async function uploadArtifact({
   const body = await readFile(filePath);
   const response = await client.send(
     new PutObjectCommand({
-      Bucket: env.EXPORTS_BUCKET_NAME,
+      Bucket: env.EXPORTER_BUCKET_NAME,
       Key: bucketKey,
       Body: body,
       ContentType: mimeType,

@@ -20,6 +20,15 @@
     "dev": {
       "cache": false,
       "persistent": true
+    },
+    "@app/exporter#dev": {
+      "cache": false,
+      "persistent": true,
+      "with": ["@infra/dev-infra#dev"]
+    },
+    "@infra/dev-infra#dev": {
+      "cache": false,
+      "persistent": true
     }
   }
 }

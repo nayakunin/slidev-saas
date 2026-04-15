@@ -33,12 +33,12 @@ function getS3Client() {
   const env = getExportEnv();
 
   return new S3Client({
-    region: env.EXPORTS_BUCKET_REGION,
-    endpoint: env.EXPORTS_BUCKET_ENDPOINT,
-    forcePathStyle: env.EXPORTS_BUCKET_FORCE_PATH_STYLE,
+    region: env.EXPORTER_BUCKET_REGION,
+    endpoint: env.EXPORTER_BUCKET_ENDPOINT,
+    forcePathStyle: env.EXPORTER_BUCKET_FORCE_PATH_STYLE,
     credentials: {
-      accessKeyId: env.EXPORTS_BUCKET_ACCESS_KEY_ID,
-      secretAccessKey: env.EXPORTS_BUCKET_SECRET_ACCESS_KEY,
+      accessKeyId: env.EXPORTER_BUCKET_ACCESS_KEY_ID,
+      secretAccessKey: env.EXPORTER_BUCKET_SECRET_ACCESS_KEY,
     },
   });
 }
@@ -63,7 +63,7 @@ async function signDownloadUrl({
   return await getSignedUrl(
     client,
     new GetObjectCommand({
-      Bucket: env.EXPORTS_BUCKET_NAME,
+      Bucket: env.EXPORTER_BUCKET_NAME,
       Key: bucketKey,
       ResponseContentDisposition: toAttachmentDisposition(fileName),
       ResponseContentType: mimeType,
@@ -206,7 +206,7 @@ export const deleteBucketObject = internalAction({
 
     await client.send(
       new DeleteObjectCommand({
-        Bucket: env.EXPORTS_BUCKET_NAME,
+        Bucket: env.EXPORTER_BUCKET_NAME,
         Key: args.bucketKey,
       }),
     );

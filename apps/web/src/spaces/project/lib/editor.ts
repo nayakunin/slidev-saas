@@ -22,6 +22,20 @@ export function normalizeProjectPath(input: string): string {
   return segments.join("/");
 }
 
+export function hasFilePath(nodes: ProjectTreeNode[], targetPath: string): boolean {
+  for (const node of nodes) {
+    if (node.type === "file" && node.path === targetPath) {
+      return true;
+    }
+
+    if (node.children && hasFilePath(node.children, targetPath)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 export function findFirstFilePath(nodes: ProjectTreeNode[]): string | null {
   for (const node of nodes) {
     if (node.type === "file") {
@@ -38,6 +52,46 @@ export function findFirstFilePath(nodes: ProjectTreeNode[]): string | null {
   }
 
   return null;
+}
+
+export function selectPreviewTargetPath({
+  entryFilePath,
+  projectTree,
+  selectedPath,
+  selectedPathKind,
+}: {
+  entryFilePath: string | null;
+  projectTree: ProjectTreeNode[];
+  selectedPath: string | null;
+  selectedPathKind: "asset" | "text" | null;
+}): string | null {
+  if (entryFilePath && hasFilePath(projectTree, entryFilePath)) {
+    return entryFilePath;
+  }
+
+  if (selectedPath && selectedPathKind === "text") {
+    return selectedPath;
+  }
+
+  return findFirstFilePath(projectTree);
+}
+
+export function buildPreviewDocument({ css, html }: { css: string; html: string }) {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>${css}</style>
+    <style>
+      html, body {
+        margin: 0;
+        background: #0b1020;
+      }
+    </style>
+  </head>
+  <body>${html}</body>
+</html>`;
 }
 
 export function guessTextMimeType(path: string): string {

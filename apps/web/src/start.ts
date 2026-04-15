@@ -1,8 +1,9 @@
 import { createStart } from "@tanstack/react-start";
-import { authkitMiddleware } from "@workos/authkit-tanstack-react-start";
+
+import { workOSRequestMiddleware } from "@/integrations/workos/middleware";
 
 export const startInstance = createStart(() => {
   return {
-    requestMiddleware: [authkitMiddleware()],
+    requestMiddleware: [workOSRequestMiddleware],
   };
 });

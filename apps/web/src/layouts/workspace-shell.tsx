@@ -44,9 +44,9 @@ import {
   SidebarProvider,
   SidebarSeparator,
   SidebarTrigger,
+  useSidebar,
 } from "@/components/ui/sidebar";
-import { useSidebar } from "@/components/ui/sidebar";
-import { useUser } from "@/hooks/useUser";
+import { useUser } from "@/integrations/workos/use-user";
 
 function UserNav({
   displayName,
@@ -132,7 +132,7 @@ function UserNav({
   );
 }
 
-export function AppShell({
+export function WorkspaceShell({
   children,
   breadcrumb,
 }: {
@@ -157,8 +157,8 @@ export function AppShell({
         <SidebarHeader>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton size="lg" render={<Link to="/" />}>
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-foreground text-background text-sm font-bold shrink-0">
+              <SidebarMenuButton size="lg" render={<Link to="/dashboard" />}>
+                <div className="flex aspect-square size-8 shrink-0 items-center justify-center rounded-lg bg-foreground text-sm font-bold text-background">
                   S
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
@@ -178,7 +178,7 @@ export function AppShell({
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton render={<Link to="/" />}>
+                  <SidebarMenuButton render={<Link to="/dashboard" />}>
                     <HouseIcon />
                     <span>Dashboard</span>
                   </SidebarMenuButton>

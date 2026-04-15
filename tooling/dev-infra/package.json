@@ -1,0 +1,7 @@
+{
+  "name": "@infra/dev-infra",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose up"
+  }
+}

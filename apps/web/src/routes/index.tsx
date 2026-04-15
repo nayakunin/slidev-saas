@@ -1,22 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { AppShell } from "@/components/app-shell";
-import { Dashboard } from "@/components/dashboard";
-import { LandingPage } from "@/components/landing";
-import { useUser } from "@/hooks/useUser";
+import { loadInitialAuthFn } from "@/integrations/workos/auth.functions";
+import { HomePage } from "@/spaces/home/page";
 
-export const Route = createFileRoute("/")({ component: HomePage });
+export const Route = createFileRoute("/")({
+  loader: async () => {
+    const initialAuth = await loadInitialAuthFn();
 
-function HomePage() {
-  const user = useUser();
-
-  if (!user) {
-    return <LandingPage />;
-  }
-
-  return (
-    <AppShell breadcrumb="Dashboard">
-      <Dashboard />
-    </AppShell>
-  );
-}
+    if (initialAuth?.user) {
+      throw redirect({ to: "/dashboard" });
+    }
+  },
+  component: HomePage,
+});

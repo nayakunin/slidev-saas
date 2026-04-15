@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
-export function Dashboard() {
+export function DashboardContent() {
   const projects = useQuery(api.projects.listProjects, {});
   const createProject = useMutation(api.projects.createProjectFromTemplate);
   const navigate = useNavigate();
@@ -67,7 +67,7 @@ export function Dashboard() {
               }
               type="button"
             >
-              <Card className="transition-shadow hover:shadow-md cursor-pointer h-full">
+              <Card className="h-full cursor-pointer transition-shadow hover:shadow-md">
                 <CardHeader>
                   <CardTitle>{project.title}</CardTitle>
                   <CardDescription>{project.slug}</CardDescription>
